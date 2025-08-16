@@ -7,7 +7,7 @@ use App\Entity\User;
 use OpenApi\Attributes as OA;
 use App\Repository\UserRepository;
 use App\Dto\Response\UserResponseDto;
-use App\Dto\Response\LoginResponseDto;
+use App\Dto\Response\AuthResponseDto;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +22,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 final class LoginController extends AbstractController
 {
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    #[OA\Tag(name: "Authentification")]
+    #[OA\Tag(name: "Auth")]
     #[OA\Response(
         response: 200,
         description: 'Successful login',
@@ -67,7 +67,7 @@ final class LoginController extends AbstractController
 
         $token = $jwtManager->create($user);
 
-        $dto = new LoginResponseDto($token, new UserResponseDto($user));
+        $dto = new AuthResponseDto($token, new UserResponseDto($user));
 
         return new JsonResponse(
             json_decode($serializer->serialize($dto, 'json'), true),

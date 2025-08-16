@@ -2,9 +2,11 @@
 
 namespace App\Dto\Response;
 
+use Symfony\Component\Uid\Uuid;
+
 class UserResponseDto
 {
-    public int $id;
+    public Uuid $id;
     public string $email;
     public array $roles;
     public string $firstname;

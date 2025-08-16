@@ -4,9 +4,9 @@ namespace App\Dto\Response;
 
 use App\Dto\Response\UserResponseDto;
 
-class LoginResponseDto
+class AuthResponseDto
 {
-   public string $accessToken;
+    public string $accessToken;
     public UserResponseDto $user;
 
     public function __construct(string $accessToken, UserResponseDto $user)

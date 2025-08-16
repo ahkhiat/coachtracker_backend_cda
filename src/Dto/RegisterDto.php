@@ -23,7 +23,7 @@ class RegisterDto
     #[Assert\Length(min: 3)]
     public string $lastname;
 
-    #[Assert\NotBlank]
+    // #[Assert\NotBlank]
     #[Assert\Type(type: "DateTimeInterface")]
     #[Assert\GreaterThanOrEqual("1900-01-01")]
     public ?\DateTimeInterface $birthdate = null;

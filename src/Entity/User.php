@@ -2,21 +2,25 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
+#[ORM\HasLifecycleCallbacks] 
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\GeneratedValue(strategy: 'NONE')] 
+    #[ORM\Column(type: "uuid", unique: true)]
+    private ?Uuid $id = null;
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
@@ -33,28 +37,64 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
     private ?string $firstname = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 100)]
     private ?string $lastname = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $birthdate = null;
+    private ?\DateTime $birthdate = null;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Address $address = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Coach $coach = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Player $player = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $adress = null;
+    private ?string $image_name = null;
 
-    #[ORM\Column(length: 5, nullable: true)]
-    private ?string $postal_code = null;
+    /**
+     * @var Collection<int, UserIsParentOf>
+     */
+    #[ORM\OneToMany(targetEntity: UserIsParentOf::class, mappedBy: 'user')]
+    private Collection $userIsParentOfs;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $city = null;
+    public function __construct()
+    {
+        $this->userIsParentOfs = new ArrayCollection();
+    }
 
-    #[ORM\Column(length: 15, nullable: true)]
-    private ?string $phone = null;
+    #[ORM\PrePersist] // important
+    public function generateUuid(): void
+    {
+        if ($this->id === null) {
+            $this->id = Uuid::v4();
+        }
+    }
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
-    public function getId(): ?int
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
@@ -160,51 +200,119 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getAdress(): ?string
+    public function getAddress(): ?Address
     {
-        return $this->adress;
+        return $this->address;
     }
 
-    public function setAdress(?string $adress): static
+    public function setAddress(?Address $address): static
     {
-        $this->adress = $adress;
+        $this->address = $address;
 
         return $this;
     }
 
-    public function getPostalCode(): ?string
+    public function getCoach(): ?Coach
     {
-        return $this->postal_code;
+        return $this->coach;
     }
 
-    public function setPostalCode(?string $postal_code): static
+    public function setCoach(Coach $coach): static
     {
-        $this->postal_code = $postal_code;
+        // set the owning side of the relation if necessary
+        if ($coach->getUser() !== $this) {
+            $coach->setUser($this);
+        }
+
+        $this->coach = $coach;
 
         return $this;
     }
 
-    public function getCity(): ?string
+    public function getPlayer(): ?Player
     {
-        return $this->city;
+        return $this->player;
     }
 
-    public function setCity(?string $city): static
+    public function setPlayer(Player $player): static
     {
-        $this->city = $city;
+        // set the owning side of the relation if necessary
+        if ($player->getUser() !== $this) {
+            $player->setUser($this);
+        }
+
+        $this->player = $player;
 
         return $this;
     }
 
-    public function getPhone(): ?string
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->phone;
+        return $this->createdAt;
     }
 
-    public function setPhone(?string $phone): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->phone = $phone;
+        $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->image_name;
+    }
+
+    public function setImageName(?string $image_name): static
+    {
+        $this->image_name = $image_name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserIsParentOf>
+     */
+    public function getUserIsParentOfs(): Collection
+    {
+        return $this->userIsParentOfs;
+    }
+
+    public function addUserIsParentOf(UserIsParentOf $userIsParentOf): static
+    {
+        if (!$this->userIsParentOfs->contains($userIsParentOf)) {
+            $this->userIsParentOfs->add($userIsParentOf);
+            $userIsParentOf->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserIsParentOf(UserIsParentOf $userIsParentOf): static
+    {
+        if ($this->userIsParentOfs->removeElement($userIsParentOf)) {
+            // set the owning side to null (unless already changed)
+            if ($userIsParentOf->getUser() === $this) {
+                $userIsParentOf->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+        public function getTeam(): ?Team
+    {
+        return $this->player ? $this->player->getPlaysInTeam() : null;
     }
 }
