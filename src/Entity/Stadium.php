@@ -35,6 +35,11 @@ class Stadium
         $this->events = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->name ?? 'Stadium without name';
+    }
+
     #[ORM\PrePersist]
     public function generateUuid(): void
     {

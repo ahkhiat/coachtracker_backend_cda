@@ -31,7 +31,7 @@ class Event
     private ?Team $team = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?VisitorTeam $visitorTeam = null;
 
     #[ORM\ManyToOne(inversedBy: 'events')]

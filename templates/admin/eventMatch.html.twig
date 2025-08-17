@@ -1,0 +1,27 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block main %}
+<h3>Changer statut</h3>
+        
+
+        {% for status in statusOptions %}
+            <a href="{{ current_url ~ '&status=' ~ status.value }}">{{ status.label|capitalize }}</a>
+        {% endfor %}
+
+    
+    <h1>Événement : </h1>
+    {{ include('admin/eventStatusBadge.html.twig', { field: {'value': match.status}}) }} <br>
+
+    <br>
+
+    <p><strong>Date :</strong> {{ match.date|date('d/m/Y H:i') }}</p>
+    <p><strong>Lieu :</strong> {{ match.stadium.name }}</p>
+    <p><strong>Adresse :</strong> {{ match.stadium.address.street }} {{ match.stadium.address.postalCode }} {{ match.stadium.address.town }}</p>
+    {# <p><strong>Statut :</strong> {{ match.status.label }}</p> #}
+
+
+    
+
+    
+
+{% endblock %}

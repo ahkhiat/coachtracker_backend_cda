@@ -1,0 +1,11 @@
+{% if field.value.name == 'UPCOMING' %}
+    <span class="badge text-bg-secondary">À venir</span>
+{% elseif field.value.name == 'ONGOING' %}
+    <span class="badge text-bg-success">En cours</span>
+{% elseif field.value.name == 'FINISHED' %}
+    <span class="badge text-bg-primary">Terminé</span>
+{% elseif field.value.name == 'CANCELLED' %}
+    <span class="badge text-bg-danger">Annulé</span>
+{% elseif field.value.name == 'POSTPONED' %}
+    <span class="badge text-bg-warning">Reporté</span>
+{% endif %}

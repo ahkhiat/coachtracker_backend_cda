@@ -49,6 +49,11 @@ class Team
         $this->events = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+
     #[ORM\PrePersist] 
     public function generateUuid(): void
     {
