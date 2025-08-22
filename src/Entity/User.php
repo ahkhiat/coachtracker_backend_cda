@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Enum\RoleEnum;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -36,6 +37,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    private ?string $plainPassword = null;
 
     #[ORM\Column(length: 100)]
     private ?string $firstname = null;
@@ -70,9 +73,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserIsParentOf::class, mappedBy: 'user')]
     private Collection $userIsParentOfs;
 
+    /**
+     * @var Collection<int, UserIsParentOf>
+     */
+    #[ORM\OneToMany(targetEntity: UserIsParentOf::class, mappedBy: 'child')]
+    private Collection $userIsChildOfs;
+
+
+    #[ORM\Column(length: 25, nullable: true)]
+    private ?string $phone = null;
+
     public function __construct()
     {
         $this->userIsParentOfs = new ArrayCollection();
+        $this->userIsChildOfs = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     #[ORM\PrePersist] // important
@@ -111,6 +130,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): void
+    {
+        $this->plainPassword = $plainPassword;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -132,6 +161,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return array_unique($roles);
     }
+
+    public function getRoleLabels(): array
+    {
+        return array_map(
+            fn(string $role) => RoleEnum::from($role)->label(),
+            array_filter(
+                $this->roles, 
+                fn(string $role) => $role !== RoleEnum::ROLE_USER->value
+                )
+        );
+    }
+
 
     /**
      * @param list<string> $roles
@@ -311,8 +352,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, UserIsParentOf>
+     */
+    public function getUserIsChildOfs(): Collection
+    {
+        return $this->userIsChildOfs;
+    }
+    public function addUserIsChildOf(UserIsParentOf $userIsChildOf): static
+    {
+        if (!$this->userIsChildOfs->contains($userIsChildOf)) {
+            $this->userIsChildOfs->add($userIsChildOf);
+            $userIsChildOf->setChild($this);
+        }       
+        return $this;
+    }
+    public function removeUserIsChildOf(UserIsParentOf $userIsChildOf): static
+    {
+        if ($this->userIsChildOfs->removeElement($userIsChildOf)) {
+            // set the owning side to null (unless already changed)
+            if ($userIsChildOf->getChild() === $this) {
+                $userIsChildOf->setChild(null);
+            }
+        }   
+        return $this;
+    }
+
         public function getTeam(): ?Team
     {
         return $this->player ? $this->player->getPlaysInTeam() : null;
     }
+
+        public function getPhone(): ?string
+        {
+            return $this->phone;
+        }
+
+        public function setPhone(?string $phone): static
+        {
+            $this->phone = $phone;
+
+            return $this;
+        }
 }

@@ -19,7 +19,7 @@ class UserIsParentOf
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userIsParentOfs')]
+    #[ORM\ManyToOne(inversedBy: 'userIsChildOfs')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $child = null;
 

@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\VisitorTeam;
 use App\Enum\AgeCategoryEnum;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -16,6 +17,13 @@ class VisitorTeamCrudController extends AbstractCrudController
     public static function getEntityFqcn(): string
     {
         return VisitorTeam::class;
+    }
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Equipe visiteuse')
+            ->setEntityLabelInPlural('Equipes visiteuses')
+        ;
     }
 
     

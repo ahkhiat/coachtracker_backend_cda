@@ -27,6 +27,13 @@ class StadiumCrudController extends AbstractCrudController
     {
         return Stadium::class;
     }
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Stade')
+            ->setEntityLabelInPlural('Stades')
+        ;
+    }
 
     
     public function configureFields(string $pageName): iterable

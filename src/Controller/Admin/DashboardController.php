@@ -56,18 +56,32 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-    yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+        yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
 
-        yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-list', entityFqcn: User::class);
-        // yield MenuItem::linkToCrud('Coachs', 'fas fa-list', entityFqcn: Coach::class);
-        // yield MenuItem::linkToCrud('Joueurs', 'fas fa-list', entityFqcn: Player::class);
-        // yield MenuItem::linkToCrud('Parents', 'fas fa-list', entityFqcn: UserIsParentOf::class);
-
+        yield MenuItem::section('Gestion des évenements', 'fas fa-calendar-alt');
         yield MenuItem::linkToCrud('Evénements', 'fas fa-list', entityFqcn: Event::class);
-        yield MenuItem::linkToCrud('Adresses', 'fas fa-list', entityFqcn: Address::class);
+
+        yield MenuItem::section('Gestion des utilisateurs', 'fas fa-users');
+
+        yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-list', entityFqcn: User::class)
+            // ->setPermission('ROLE_ADMIN')
+            ->setAction('index')
+            ->setDefaultSort([
+                'roles' => 'ASC',
+                'firstname' => 'ASC'])
+            ;
+        yield MenuItem::linkToCrud('Coachs', 'fas fa-list', entityFqcn: Coach::class);
+        yield MenuItem::linkToCrud('Joueurs', 'fas fa-list', entityFqcn: Player::class);
+        yield MenuItem::linkToCrud('Parents', 'fas fa-list', entityFqcn: UserIsParentOf::class);
+
+        yield MenuItem::section('Gestion des équipes');
+
         yield MenuItem::linkToCrud('Equipes', 'fas fa-users', entityFqcn: Team::class);
         yield MenuItem::linkToCrud('Equipes visiteuses', 'fas fa-users', entityFqcn: VisitorTeam::class);
         yield MenuItem::linkToCrud('Stades', 'fas fa-users', entityFqcn: Stadium::class);
         yield MenuItem::linkToCrud('Clubs', 'fas fa-users', entityFqcn: Club::class);   
+
+        yield MenuItem::section('Gestion des adresses');
+        yield MenuItem::linkToCrud('Adresses', 'fas fa-map-marker-alt', entityFqcn: Address::class);
     }
 }
