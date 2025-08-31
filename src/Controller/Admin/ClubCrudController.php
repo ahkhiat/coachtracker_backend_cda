@@ -67,8 +67,8 @@ class ClubCrudController extends AbstractCrudController
             ImageField::new('image_name')
                 ->setLabel('Logo du club')
                 ->setHelp('Image du produit en 600x600')
-                ->setBasePath('/uploads')
-                ->setUploadDir('public/uploads')
+                ->setBasePath('/uploads/clubs')
+                ->setUploadDir('public/uploads/clubs')
                 ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
                 ->setRequired($required),
             // AssociationField::new('address', 'Adresse')

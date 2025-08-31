@@ -1,0 +1,139 @@
+<div class="row justify-content-left">
+    <div class="col-md-3 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Taux de convocation</h5>
+
+                <svg viewBox="0 0 36 36" width="120" height="120">
+                    <!-- Cercle de fond -->
+                    <path
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e9ecef"
+                        stroke-width="3"
+                    />
+
+                    <!-- Cercle de progression -->
+                    <path
+                        stroke-dasharray="{{stats.convocationRate}}, 100" 
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#0d6efd"
+                        stroke-width="3"
+                    />
+
+                    <!-- Texte au centre -->
+                    <text x="18" y="20.35" text-anchor="middle" font-size="8" fill="#212529">{{stats.convocationRate}}%</text>
+                    
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Présence aux entrainements</h5>
+
+                <svg viewBox="0 0 36 36" width="120" height="120">
+                    <!-- Cercle de fond -->
+                    <path
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e9ecef"
+                        stroke-width="3"
+                    />
+
+                    <!-- Cercle de progression -->
+                    <path
+                        stroke-dasharray="{{stats.trainingPresenceRate}}, 100" 
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#0d6efd"
+                        stroke-width="3"
+                    />
+
+                    <!-- Texte au centre -->
+                    <text x="18" y="20.35" text-anchor="middle" font-size="8" fill="#212529">{{stats.trainingPresenceRate}}%</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+   
+<div class="col-md-3 mb-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Présence aux matchs</h5>
+
+                <svg viewBox="0 0 36 36" width="120" height="120">
+                    <!-- Cercle de fond -->
+                    <path
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e9ecef"
+                        stroke-width="3"
+                    />
+
+                    <!-- Cercle de progression -->
+                    <path
+                        stroke-dasharray="{{stats.matchPresenceRate}}, 100" 
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#0d6efd"
+                        stroke-width="3"
+                    />
+
+                    <!-- Texte au centre -->
+                    <text x="18" y="20.35" text-anchor="middle" font-size="8" fill="#212529">{{stats.matchPresenceRate}}%</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    
+
+   
+
+
+
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Statistiques</h5>
+        <ul class="list-group list-group-flush rounded-3">
+            <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <p class="mb-0">Total de matchs sur la saison</p>
+                <span class="h6">{{ stats.totalMatches }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <p class="mb-0">Total de séances d'entraînement</p>
+                <span class="h6">{{ stats.totalTrainingSessions }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <p class="mb-0">Total de convocations</p>
+                <span class="h6">{{ stats.totalConvocations }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <p class="mb-0">Total de présences aux matchs</p>
+                <span class="h6">{{ stats.totalMatchesPresences }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-2">
+                <p class="mb-0">Total de présences aux entraînements</p>
+                <span class="h6">{{ stats.totalTrainingSessionsPresences }}</span>
+            </li>
+        </ul>
+    </div>
+</div>

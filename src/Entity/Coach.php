@@ -18,7 +18,7 @@ class Coach
     #[ORM\ManyToOne(inversedBy: 'coaches')]
     private ?Team $isCoachOf = null;
 
-    #[ORM\OneToOne(inversedBy: 'coach', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'coach', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
     

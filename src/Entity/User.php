@@ -65,28 +65,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image_name = null;
+    private ?string $imageName = null;
 
     /**
      * @var Collection<int, UserIsParentOf>
      */
     #[ORM\OneToMany(targetEntity: UserIsParentOf::class, mappedBy: 'user')]
-    private Collection $userIsParentOfs;
+    private Collection $isParentOfs;
 
     /**
      * @var Collection<int, UserIsParentOf>
      */
     #[ORM\OneToMany(targetEntity: UserIsParentOf::class, mappedBy: 'child')]
-    private Collection $userIsChildOfs;
+    private Collection $isChildOfs;
 
 
-    #[ORM\Column(length: 25, nullable: true)]
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Regex(
+        pattern: "/^0[1-9](\d{8})$/",
+        message: "The phone number must be a valid French number (10 digits starting with 0)."
+    )]
     private ?string $phone = null;
 
     public function __construct()
     {
-        $this->userIsParentOfs = new ArrayCollection();
-        $this->userIsChildOfs = new ArrayCollection();
+        $this->isParentOfs = new ArrayCollection();
+        $this->isChildOfs = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -313,12 +317,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getImageName(): ?string
     {
-        return $this->image_name;
+        return $this->imageName;
     }
 
-    public function setImageName(?string $image_name): static
+    public function setImageName(?string $imageName): static
     {
-        $this->image_name = $image_name;
+        $this->imageName = $imageName;
 
         return $this;
     }
@@ -326,27 +330,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, UserIsParentOf>
      */
-    public function getUserIsParentOfs(): Collection
+    public function getIsParentOfs(): Collection
     {
-        return $this->userIsParentOfs;
+        return $this->isParentOfs;
     }
 
-    public function addUserIsParentOf(UserIsParentOf $userIsParentOf): static
+    public function addIsParentOf(UserIsParentOf $isParentOf): static
     {
-        if (!$this->userIsParentOfs->contains($userIsParentOf)) {
-            $this->userIsParentOfs->add($userIsParentOf);
-            $userIsParentOf->setUser($this);
+        if (!$this->isParentOfs->contains($isParentOf)) {
+            $this->isParentOfs->add($isParentOf);
+            $isParentOf->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeUserIsParentOf(UserIsParentOf $userIsParentOf): static
+    public function removeIsParentOf(UserIsParentOf $isParentOf): static
     {
-        if ($this->userIsParentOfs->removeElement($userIsParentOf)) {
+        if ($this->isParentOfs->removeElement($isParentOf)) {
             // set the owning side to null (unless already changed)
-            if ($userIsParentOf->getUser() === $this) {
-                $userIsParentOf->setUser(null);
+            if ($isParentOf->getUser() === $this) {
+                $isParentOf->setUser(null);
             }
         }
 
@@ -356,24 +360,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, UserIsParentOf>
      */
-    public function getUserIsChildOfs(): Collection
+    public function getIsChildOfs(): Collection
     {
-        return $this->userIsChildOfs;
+        return $this->isChildOfs;
     }
-    public function addUserIsChildOf(UserIsParentOf $userIsChildOf): static
+    public function addIsChildOf(UserIsParentOf $isChildOfs): static
     {
-        if (!$this->userIsChildOfs->contains($userIsChildOf)) {
-            $this->userIsChildOfs->add($userIsChildOf);
-            $userIsChildOf->setChild($this);
+        if (!$this->isChildOfs->contains($isChildOfs)) {
+            $this->isChildOfs->add($isChildOfs);
+            $isChildOfs->setChild($this);
         }       
         return $this;
     }
-    public function removeUserIsChildOf(UserIsParentOf $userIsChildOf): static
+    public function removeIsChildOf(UserIsParentOf $isChildOfs): static
     {
-        if ($this->userIsChildOfs->removeElement($userIsChildOf)) {
+        if ($this->isChildOfs->removeElement($isChildOfs)) {
             // set the owning side to null (unless already changed)
-            if ($userIsChildOf->getChild() === $this) {
-                $userIsChildOf->setChild(null);
+            if ($isChildOfs->getChild() === $this) {
+                $isChildOfs->setChild(null);
             }
         }   
         return $this;

@@ -2,16 +2,34 @@
 
 {% block main %}
     
-    <h3><strong>Utilisateur</strong></h3>
-    <hr class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3><strong>Utilisateur</strong></h3>
+        <a href="{{ editUrl }}" class="btn btn-white mb-3">Éditer le profil</a>
+    </div>
     
+    <hr class="my-4">
 
     <div class="row">
-      <div class="col-lg-4">
+      <div class="col-lg-3">
         <div class="card mb-4">
           <div class="card-body text-center">
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
-              class="rounded-circle img-fluid" style="width: 150px;">
+                <div class="d-flex justify-content-center">
+                    <div class="position-relative" style="width: 150px; height: 150px;">
+                        <!-- Avatar -->
+                        <div class="rounded-circle overflow-hidden w-100 h-100 border">
+                            <img id="avatarPreview"
+                                src="{{ user.imageName ? asset('uploads/users/' ~ user.imageName) : asset('images/default-avatar.png') }}"
+                                alt="avatar"
+                                class="w-100 h-100"
+                                style="object-fit: cover;">
+                        </div>
+                        <!-- Bouton d’édition -->
+                        <a href="{{ editUrl }}" class="btn btn-sm btn-white rounded-circle position-absolute bottom-0 end-0 border" title="Changer la photo de profil">
+                            <i class="fas fa-camera"></i>
+                        </a>
+                    </div>
+                </div>
+
             <h5 class="my-3">{{ user.firstname }} {{ user.lastname }}</h5>
             {% for role in user.roleLabels %}
                 <p class="text-muted mb-1">{{ role }}</p>
@@ -35,15 +53,12 @@
           </div>
         </div>
 
-        
-
-        <div class="card mb-4 mb-lg-0">
+        <div class="card mb-4">
           <div class="card-body p-0">
-
             <ul class="list-group list-group-flush rounded-3">
-            {% if user.userIsParentOfs|length > 0 %}
+            {% if user.isParentOfs|length > 0 %}
                 <p class="mb-0 p-3 border-bottom">Parent de :</p>
-            {% for relation in user.userIsParentOfs %}
+            {% for relation in user.isParentOfs %}
                 <li class="list-group-item d-flex justify-content-between align-items-center p-3">
                     <p class="mb-0">{{ relation.child.firstname }} {{ relation.child.lastname }}</p>
                     <a href="{{ ea_url()
@@ -55,9 +70,9 @@
             {% endfor %}
             {% endif %}
 
-            {% if user.userIsChildOfs|length > 0 %}
+            {% if user.isChildOfs|length > 0 %}
                 <p class="mb-0 p-3 border-bottom">Enfant de :</p>
-            {% for relation in user.userIsChildOfs %}
+            {% for relation in user.isChildOfs %}
                 
                 <li class="list-group-item d-flex justify-content-between align-items-center p-3">
                     <p class="mb-0">{{ relation.user.firstname }} {{ relation.user.lastname }}</p>
@@ -70,7 +85,23 @@
             {% endfor %}
             {% endif %}
             </ul>
-        
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush rounded-3">
+            {% if user.player %}
+                <p class="mb-0 p-3 border-bottom">Joueur dans :</p>
+                <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <p class="mb-0">{{ user.player.playsInTeam.name }}</p>
+                    <a href="{{ ea_url()
+                        .setController('App\\Controller\\Admin\\TeamCrudController')
+                        .setAction('show')
+                        .setEntityId(user.player.playsInTeam.id)
+                    }}" class="btn btn-primary btn-sm">Voir</a>
+            {% endif %}
+            </ul>
           </div>
         </div>
 
@@ -80,7 +111,7 @@
           <div class="card-body">
             <div class="row">
               <div class="col-sm-3">
-                <p class="mb-0">Full Name</p>
+                <p class="mb-0">Prénom et Nom</p>
               </div>
               <div class="col-sm-9">
                 <p class="text-muted mb-0">{{ user.firstname }} {{ user.lastname }}</p>
@@ -98,7 +129,7 @@
             <hr>
             <div class="row">
               <div class="col-sm-3">
-                <p class="mb-0">Phone</p>
+                <p class="mb-0">Tél</p>
               </div>
               <div class="col-sm-9">
                 <p class="text-muted mb-0">{{ user.phone ? user.phone : 'Non renseigné' }}</p>
@@ -107,7 +138,7 @@
             <hr>
             <div class="row">
               <div class="col-sm-3">
-                <p class="mb-0">Date of Birth</p>
+                <p class="mb-0">Date de naissance</p>
               </div>
               <div class="col-sm-9">
                 <p class="text-muted mb-0">{{ user.birthdate ? user.birthdate|date('d/m/Y') : 'Non renseignée' }}</p>
@@ -116,120 +147,25 @@
             <hr>
             <div class="row">
               <div class="col-sm-3">
-                <p class="mb-0">Address</p>
+                <p class="mb-0">Addresse</p>
               </div>
               <div class="col-sm-9">
-                <p class="text-muted mb-0">Bay Area, San Francisco, CA</p>
+                <p class="text-muted mb-0"></p>
               </div>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card mb-4 mb-md-0">
-              <div class="card-body">
-                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
-                </p>
-                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
-                <div class="progress rounded mb-2" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card mb-4 mb-md-0">
-              <div class="card-body">
-                <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
-                </p>
-                <p class="mb-1" style="font-size: .77rem;">Web Design</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
-                <div class="progress rounded" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
-                <div class="progress rounded mb-2" style="height: 5px;">
-                  <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
-                    aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+        
+          {# Si l'utilisateur est un joueur, afficher les statistiques #}
+        {% if user.player %}
+          {% include 'admin/components/playerStats.html.twig' %}
+        {% endif %}
 
-                {# <div class="card text-center shadow-sm" style="width: 200px;">
-                    <div class="card-body">
-                        <h5 class="card-title">Progression</h5>
-
-                        <svg viewBox="0 0 36 36" width="120" height="120">
-                        <!-- Cercle de fond -->
-                        <path
-                            d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="#e9ecef"
-                            stroke-width="3"
-                        />
-
-                        <!-- Cercle de progression -->
-                        <path
-                            stroke-dasharray="70, 100" 
-                            d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831"
-                            fill="none"
-                            stroke="#0d6efd"
-                            stroke-width="3"
-                        />
-
-                        <!-- Texte au centre -->
-                        <text x="18" y="20.35" text-anchor="middle" font-size="8" fill="#212529">70%</text>
-                        </svg>
-                    </div>
-                </div> #}
+       
 
 
-
-
-
-
-              </div>
-            </div>
-          </div>
-        </div>
+          
+            
       </div>
     </div>
 

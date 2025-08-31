@@ -1,0 +1,96 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block main %}
+
+    <div class="d-flex justify-content-between align-items-center">
+
+        <p class="h5">
+            {{ event.date|format_datetime('full', 'short', locale='fr') }}
+        </p>
+
+        {% if not event.isFinished %}
+        <div class="d-flex justify-content-end mb-2">
+            {% for status in statusOptions %}
+                <a href="{{ current_url ~ '&status=' ~ status.value }}" 
+                class="btn me-2 {% if event.status == status %} btn-primary {% endif %}">
+                    {{ status.label|capitalize }}
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    
+    <h3>Entrainement : </h3>
+    {{ include('admin/eventStatusBadge.html.twig', { field: {'value': event.status}}) }} <br>
+
+    <br>
+
+    <section class="my-4 p-4 bg-light rounded">
+        <h3>Idée pour améliorer la page Entrainement</h3>
+        <ul>
+            <li>Saisir les présences</li>
+        </ul>
+    </section>
+
+    <p><strong>Lieu :</strong> {{ event.stadium.name }}, {{ event.stadium.address.street }} {{ event.stadium.address.postalCode }} {{ event.stadium.address.town }}</p>
+    {# <p><strong>Statut :</strong> {{ match.status.label }}</p> #}
+
+
+    
+
+
+    {# Flash messages Bootstrap #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+
+
+
+    {% if presences|length == 0 %}
+        <a href="{{ createPresencesUrl }}" class="btn btn-white mb-3">
+            <i class="fa fa-users"></i> Saisir présences
+        </a>
+    {% else %}
+        <h4>Joueuses</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Présence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for presence in presences %}
+                    <tr>
+                        <td>{{ presence.player.user.firstname }} {{ presence.player.user.lastname }}</td>
+                        <td>
+                            {% set presence = presences|filter(p => p.player.id == presence.player.id)|first %}
+
+                            {% for status in presenceOptions %}
+                                <a href="{{ current_url ~ '&presence=' ~ presence.id ~ '&presenceStatus=' ~ status.value }}"
+                                class="btn {% if presence.status.value == status.value %} btn-primary {% endif %}">
+                                    {{ status.label|capitalize }}
+                                </a>
+                            {% endfor %}
+
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+
+
+    
+
+    
+
+{% endblock %}

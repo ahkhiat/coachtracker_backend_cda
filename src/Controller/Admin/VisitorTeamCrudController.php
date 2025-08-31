@@ -2,8 +2,11 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Player;
 use App\Entity\VisitorTeam;
+use App\Entity\VisitorPlayer;
 use App\Enum\AgeCategoryEnum;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -41,5 +44,26 @@ class VisitorTeamCrudController extends AbstractCrudController
                 ->renderAsNativeWidget(false)
         ];
     }
+
+    public function persistEntity(EntityManagerInterface $em, $entityInstance): void
+    {
+        parent::persistEntity($em, $entityInstance);
+
+        if ($entityInstance instanceof VisitorTeam) {
+            $ghostPlayer = $em->getRepository(VisitorPlayer::class)->findOneBy([
+                'visitorTeam' => $entityInstance,
+            ]);
+
+            if (!$ghostPlayer) {
+                $ghostPlayer = new VisitorPlayer();
+                $ghostPlayer->generateUuid();
+                $ghostPlayer->setVisitorTeam($entityInstance);
+
+                $em->persist($ghostPlayer);
+                $em->flush(); 
+            }
+        }
+    }
+
     
 }

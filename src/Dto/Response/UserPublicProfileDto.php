@@ -19,7 +19,8 @@ class UserPublicProfileDto
     public array $roles = [];
     public ?array $playsInTeam = null;
     public ?array $isCoachOf = null;
-    public array $userIsParentOf = [];
+    public array $isParentOf = [];
+    public ?array $isChildOf = [];
     public array $stats = [];
 
     public function __construct(User $user)
@@ -45,7 +46,7 @@ class UserPublicProfileDto
             'name' => $teamCoach->getName()
         ] : null;
         ;
-        $this->userIsParentOf = $user->getUserIsParentOfs()?->map(function($child) {
+        $this->isParentOf = $user->getIsParentOfs()?->map(function($child) {
             $team = $child->getChild()->getPlayer()?->getPlaysInTeam();
 
             return [
@@ -56,6 +57,13 @@ class UserPublicProfileDto
                     'id'   => $team->getId(),
                     'name' => $team->getName()
                 ] : null
+            ];
+        })->toArray() ?? [];
+        $this->isChildOf = $user->getIsChildOfs()?->map(function($parent) {
+            return [
+                'id'        => $parent->getUser()->getId(),
+                'firstname' => $parent->getUser()->getFirstname(),
+                'lastname'  => $parent->getUser()->getLastname()
             ];
         })->toArray() ?? [];
 

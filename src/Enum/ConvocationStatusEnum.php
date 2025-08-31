@@ -4,6 +4,7 @@ namespace App\Enum;
 
 enum ConvocationStatusEnum: string
 {
+    case NOT_CALLED = 'not_called';
     case PENDING = 'pending';
     case ACCEPTED = 'accepted';
     case REJECTED = 'rejected';
@@ -12,6 +13,7 @@ enum ConvocationStatusEnum: string
     public function label(): string
     {
         return match ($this) {
+            self::NOT_CALLED => 'Non convoqué',
             self::PENDING => 'En attente',
             self::ACCEPTED => 'Acceptée',
             self::REJECTED => 'Rejetée',

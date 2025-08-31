@@ -1,0 +1,57 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block main %}
+<h3>Equipe {{ team.name }}</h3>
+        
+    <p><strong>Catégorie d'âge :</strong> {{ team.ageCategory.name }}</p>
+
+    <section class="my-4 p-4 bg-light rounded">
+        <h3>Idée pour améliorer la page équipe</h3>
+        <ul>
+            <li>Afficher les statistiques de l'équipe (nombre de victoires, défaites, nuls)</li>
+            <li>Ajouter un calendrier des prochains matchs et entrainements</li>
+            <li>Afficher le taux d'absence/présence</li>
+        </ul>
+    </section>
+
+    <h4 class="mt-4">Joueurs</h4>
+    <ul>
+        {% for player in team.players %}
+            <li>
+                {{ player.user.firstname }} {{ player.user.lastname }}
+                <a href="{{ ea_url()
+                    .setController('App\\Controller\\Admin\\UserCrudController')
+                    .setAction('show')
+                    .setEntityId(player.user.id)
+                }}" class="btn btn-primary btn-sm">Voir</a>
+            </li>
+        {% else %}
+            <li>Aucun joueur dans cette équipe.</li>
+        {% endfor %}
+    </ul>
+
+    <h4 class="mt-4">Entraîneurs</h4>
+    <ul>
+        {% for coach in team.coaches %}
+            <li>
+                {{ coach.user.firstname }} {{ coach.user.lastname }}
+                <a href="{{ ea_url()
+                    .setController('App\\Controller\\Admin\\UserCrudController')
+                    .setAction('show')
+                    .setEntityId(coach.user.id)
+                }}" class="btn btn-primary btn-sm">Voir</a>
+            </li>
+        {% else %}
+            <li>Aucun entraîneur dans cette équipe.</li>
+        {% endfor %}
+    </ul>
+
+    
+
+
+
+    
+
+    
+
+{% endblock %}

@@ -20,8 +20,8 @@ class Player
     #[ORM\ManyToOne(inversedBy: 'players')]
     private ?Team $playsInTeam = null;
 
-    #[ORM\OneToOne(inversedBy: 'player', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(inversedBy: 'player', cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
 
     /**
@@ -55,6 +55,10 @@ class Player
         if ($this->id === null) {
             $this->id = Uuid::v4();
         }
+    }
+    public function __toString(): string
+    {
+        return $this->user ? (string)$this->user : 'Joueur sans nom';
     }
 
     public function getId(): ?Uuid

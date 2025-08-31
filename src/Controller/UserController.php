@@ -44,9 +44,16 @@ final class UserController extends AbstractController
                     ]
                 ],
                 "stats" => [
-                    "convocations" => 12,
-                    "presences" => 10,
-                    "goals" => 7
+                    "matchesConvocated" => 25,
+                    "matchesPresent" => 15,
+                    "matchesAbsent" => 10,
+                    "trainingSessions" => 20,
+                    "trainingSessionsPresent" => 18,
+                    "trainingSessionsAbsent" => 2,
+                    "goals" => 7,
+                    "presenceRateMatches" => 60.0, // (matchesPresent / matchesConvocated) × 100.
+                    "presenceRateTrainingSessions" => 90.0, // (trainingsPresent / trainingsConvocated) × 100.
+                    "globalPresenceRate" => 75.0 // ((matchesPresent + trainingsPresent) / (matchesConvocated + trainingsConvocated)) × 100.
                 ]
             ]
         )

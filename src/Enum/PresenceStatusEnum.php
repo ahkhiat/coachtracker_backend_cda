@@ -4,6 +4,7 @@ namespace App\Enum;
 
 enum PresenceStatusEnum: string
 {
+    case PENDING = 'pending';
     case ON_TIME = 'on_time';
     case LATE = 'late';
     case ABSENT = 'absent';
@@ -13,6 +14,7 @@ enum PresenceStatusEnum: string
     public function label(): string
     {
         return match ($this) {
+            self::PENDING => 'En attente',
             self::ON_TIME => 'À l\'heure',
             self::LATE => 'En retard',
             self::ABSENT => 'Absent',

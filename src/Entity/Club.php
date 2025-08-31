@@ -20,7 +20,7 @@ class Club
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToOne(inversedBy: 'club', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'club', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Address $address = null;
 

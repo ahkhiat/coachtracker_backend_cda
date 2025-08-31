@@ -5,15 +5,20 @@ namespace App\Controller\Admin;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Entity\Player;
+use App\Enum\EventTypeEnum;
+use App\Service\PlayerStatsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -27,14 +32,22 @@ class UserCrudController extends AbstractCrudController
 
     private UserPasswordHasherInterface $passwordHasher;
     private $em;
-    private $adminUrlGenerator;
+    private AdminUrlGenerator $adminUrlGenerator;
+    private PlayerStatsService $playerStatsService;
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager)
+    public function __construct(
+        UserPasswordHasherInterface $passwordHasher, 
+        EntityManagerInterface $entityManager,
+        AdminUrlGenerator $adminUrlGenerator,
+        PlayerStatsService $playerStatsService
+        )
     {
         $this->passwordHasher = $passwordHasher;
         $this->em = $entityManager;
+        $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->playerStatsService = $playerStatsService;
     }
-    
+
     public static function getEntityFqcn(): string
     {
         return User::class;
@@ -47,38 +60,94 @@ class UserCrudController extends AbstractCrudController
             ->setEntityLabelInPlural('Utilisateurs')
         ;
     }
+    
     public function configureActions(Actions $actions): Actions 
     {
         $show = Action::new('Afficher')->linkToCrudAction('show');
 
         return $actions
-            ->add(Crud::PAGE_INDEX, $show)
-            ;
+            ->add(Crud::PAGE_INDEX, $show);
     }
-    public function show(AdminContext $context, Request $request)
+
+    public function show(AdminContext $context, Request $request, AdminUrlGenerator $adminUrlGenerator)
     {
         $id = $request->query->get('entityId'); 
         $user = $this->em->getRepository(User::class)->find($id);
 
+        $editUrl = $adminUrlGenerator
+            ->setController(UserCrudController::class) 
+            ->setAction('edit')
+            ->setEntityId($user->getId())
+            ->generateUrl();
+
         if (!$user) {
             throw $this->createNotFoundException("Utilisateur introuvable");
         }
-   
-        return $this->render('admin/user.html.twig', [
-            'user' => $user,
-            'current_url' => $request->getUri()
-        ]);
+
+        if($user->getRoles() && in_array('ROLE_PLAYER', $user->getRoles(), true)) {
+            $player = $this->em->getRepository(Player::class)->findOneBy(['user' => $user]);
+            if($player) {
+                $team = $player->getPlaysInTeam();
+
+                
+                $stats = $this->playerStatsService->getPlayerStats( $team, $player);
+                
+                $variables = [
+                    'user' => $user,
+                    'current_url' => $request->getUri(),
+                    'editUrl' => $editUrl,
+                    'stats' => $stats,
+                ];
+            }
+                 
+        } else {
+            $variables = [
+                'user' => $user,
+                'current_url' => $request->getUri(),
+                'editUrl' => $editUrl,
+            ];
+        }
+        return $this->render('admin/user.html.twig', $variables);
     }
+
+
 
     
     public function configureFields(string $pageName): iterable
     {
-        
+        $lastnameField = TextField::new('lastname', 'Nom de famille');
+
+        if($pageName === Crud::PAGE_NEW) {
+            $lastnameField->setFormTypeOption('data', 'Dupont');
+        }
+
         return [
-            TextField::new('firstname', 'Prénom'),
-            TextField::new('lastname', 'Nom de famille'),
-            DateField::new('birthdate', 'Date de naissance'),
+            TextField::new('firstname', 'Prénom')
+                ->formatValue(function ($value, $entity) {
+                    $url = $this->adminUrlGenerator
+                        ->setController(UserCrudController::class) 
+                        ->setAction('show') 
+                        ->setEntityId($entity->getId())
+                        ->generateUrl();
+
+                    return sprintf(
+                        '<a href="%s">%s</a>',
+                        $url, 
+                                $entity->getFirstname(),
+                            );
+                })
+                ->renderAsHtml(),
+            $lastnameField,
+            DateField::new('birthdate', 'Date de naissance')
+                ->setFormTypeOption('widget', 'single_text')
+                ->setFormTypeOption('html5', true)
+                ->setFormTypeOption('attr', ['max' => (new \DateTime())->format('Y-m-d')])
+                ->setFormTypeOption('data', new \DateTime('2000-01-01'))
+                ->setRequired(false)
+                ->hideOnIndex(),
             TextField::new('email'),
+            TextField::new('phone', 'Numéro de téléphone')
+                ->setRequired(false),
             TextField::new('plainPassword', 'Mot de passe')
                 ->setFormType(PasswordType::class)
                 ->onlyOnForms()
@@ -94,11 +163,16 @@ class UserCrudController extends AbstractCrudController
                     'Directeur' => 'ROLE_DIRECTOR',
                     'Secrétaire' => 'ROLE_SECRETARY',
                 ])->setHelp('Sélectionnez les rôles de l\'utilisateur.')
-                
                 ->allowMultipleChoices()
                 ->setRequired(true),
-        
-
+            ImageField::new('image_name')
+                ->setLabel('Photo utilisateur')
+                ->setHelp('Image du produit en 600x600')
+                ->setBasePath('/uploads/users')
+                ->setUploadDir('public/uploads/users')
+                ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
+                ->setRequired(false)
+                
         ];
     }
 
@@ -120,7 +194,6 @@ class UserCrudController extends AbstractCrudController
                 $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPlainPassword())
             );
         }
-
         parent::persistEntity($entityManager, $entityInstance);
     }
 
@@ -131,7 +204,6 @@ class UserCrudController extends AbstractCrudController
                 $this->passwordHasher->hashPassword($entityInstance, $entityInstance->getPlainPassword())
             );
         }
-
         parent::updateEntity($entityManager, $entityInstance);
     }
 

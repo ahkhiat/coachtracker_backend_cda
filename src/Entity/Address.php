@@ -32,10 +32,10 @@ class Address
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'address')]
     private Collection $users;
 
-    #[ORM\OneToOne(mappedBy: 'address', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'address', cascade: ['persist'])]
     private ?Stadium $stadium = null;
 
-    #[ORM\OneToOne(mappedBy: 'address', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'address', cascade: ['persist'])]
     private ?Club $club = null;
 
     public function __construct()

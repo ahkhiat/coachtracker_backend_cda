@@ -42,6 +42,10 @@ class Team
     #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'team')]
     private Collection $events;
 
+    #[ORM\ManyToOne(inversedBy: 'teams')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Club $club = null;
+
     public function __construct()
     {
         $this->coaches = new ArrayCollection();
@@ -177,6 +181,18 @@ class Team
                 $event->setTeam(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getClub(): ?Club
+    {
+        return $this->club;
+    }
+
+    public function setClub(?Club $club): static
+    {
+        $this->club = $club;
 
         return $this;
     }

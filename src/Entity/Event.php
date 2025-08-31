@@ -41,6 +41,8 @@ class Event
     #[ORM\Column(length: 255)]
     private ?SeasonEnum $season = null;
 
+    private ?bool $isRecurring = false;
+
     /**
      * @var Collection<int, Convocation>
      */
@@ -75,6 +77,16 @@ class Event
         if ($this->id === null) {
             $this->id = Uuid::v4();
         }
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s vs %s (%s)',
+            $this->getTeam()?->getName(),
+            $this->getVisitorTeam()?->getClub()->getName(),
+            $this->getDate()?->format('d/m/Y')
+        );
     }
 
     public function getId(): ?Uuid
@@ -254,5 +266,57 @@ class Event
         }
 
         return $this;
+    }
+    public function getHomeScore(): int
+    {
+        return $this->goals
+            ->filter(fn(Goal $goal) =>
+                $goal->getPlayer() !== null &&
+                $goal->getPlayer()->getPlaysInTeam() === $this->team
+            )
+            ->count();
+    }
+
+    // Calcul du score pour la team visiteuse
+    public function getVisitorScore(): int
+{
+    return $this->goals
+        ->filter(fn(Goal $goal) =>
+            $goal->getVisitorPlayer() !== null &&
+            $goal->getVisitorPlayer()->getVisitorTeam() === $this->visitorTeam
+        )
+        ->count();
+}
+
+    // Optionnel : score format "2 - 1"
+    public function getScore(): string
+    {
+        return $this->getHomeScore() . ' - ' . $this->getVisitorScore();
+    }
+
+    
+    public function getIsRecurring(): bool
+    {
+        return $this->isRecurring;
+    }
+
+   
+    public function setIsRecurring($isRecurring): self
+    {
+        $this->isRecurring = $isRecurring;
+
+        return $this;
+    }
+    public function isOngoing(): bool
+    {
+        return $this->status === EventStatusEnum::ONGOING;
+    }
+    public function isFinished(): bool
+    {
+        return $this->status === EventStatusEnum::FINISHED;
+    }
+    public function isMatch(): bool
+    {
+        return $this->eventType === EventTypeEnum::MATCH;
     }
 }

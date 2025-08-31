@@ -37,9 +37,16 @@ class VisitorTeam
     #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'visitorTeam')]
     private Collection $events;
 
+    /**
+     * @var Collection<int, VisitorPlayer>
+     */
+    #[ORM\OneToMany(targetEntity: VisitorPlayer::class, mappedBy: 'visitorTeam')]
+    private Collection $visitorPlayers;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
+        $this->visitorPlayers = new ArrayCollection();
     }
     public function __tostring()
     {
@@ -107,6 +114,36 @@ class VisitorTeam
             // set the owning side to null (unless already changed)
             if ($event->getVisitorTeam() === $this) {
                 $event->setVisitorTeam(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, VisitorPlayer>
+     */
+    public function getVisitorPlayers(): Collection
+    {
+        return $this->visitorPlayers;
+    }
+
+    public function addVisitorPlayer(VisitorPlayer $visitorPlayer): static
+    {
+        if (!$this->visitorPlayers->contains($visitorPlayer)) {
+            $this->visitorPlayers->add($visitorPlayer);
+            $visitorPlayer->setVisitorTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVisitorPlayer(VisitorPlayer $visitorPlayer): static
+    {
+        if ($this->visitorPlayers->removeElement($visitorPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($visitorPlayer->getVisitorTeam() === $this) {
+                $visitorPlayer->setVisitorTeam(null);
             }
         }
 

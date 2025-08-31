@@ -2,9 +2,14 @@
 
 namespace App\Repository;
 
+use App\Entity\Player;
 use App\Entity\Presence;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Enum\EventTypeEnum;
+use App\Enum\EventStatusEnum;
+use App\Enum\PresenceStatusEnum;
+use Composer\XdebugHandler\Status;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Presence>
@@ -16,28 +21,40 @@ class PresenceRepository extends ServiceEntityRepository
         parent::__construct($registry, Presence::class);
     }
 
-    //    /**
-    //     * @return Presence[] Returns an array of Presence objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function countMatchesPresencesByPlayer(Player $player): int
+    {
+        return $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->innerJoin('p.event', 'e')
+            ->andWhere('p.player = :playerId')
+            ->andWhere('p.status IN (:statuses)')
+            ->andWhere('e.eventType = :eventType')
+            ->setParameter('playerId', $player->getId(), "uuid")
+            ->setParameter('statuses', [
+                PresenceStatusEnum::ON_TIME,
+                PresenceStatusEnum::LATE
+                ])
+            ->setParameter('eventType', EventTypeEnum::MATCH)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Presence
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function countTrainingSessionsPresencesByPlayer(Player $player): int
+    {
+        return $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->innerJoin('p.event', 'e')
+            ->andWhere('p.player = :playerId')
+            ->andWhere('p.status IN (:statuses)')
+            ->andWhere('e.eventType = :eventType')
+            ->setParameter('playerId', $player->getId(), "uuid")
+            ->setParameter('statuses', [
+                PresenceStatusEnum::ON_TIME,
+                PresenceStatusEnum::LATE
+                ])
+            ->setParameter('eventType', EventTypeEnum::TRAINING)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+   
 }

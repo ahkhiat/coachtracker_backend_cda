@@ -1,27 +1,203 @@
 {% extends '@!EasyAdmin/layout.html.twig' %}
 
 {% block main %}
-<h3>Changer statut</h3>
-        
 
-        {% for status in statusOptions %}
-            <a href="{{ current_url ~ '&status=' ~ status.value }}">{{ status.label|capitalize }}</a>
-        {% endfor %}
+    <div class="d-flex justify-content-between align-items-center">
+
+        <p class="h5">
+            {{ event.date|format_datetime('full', 'short', locale='fr') }}
+        </p>
+
+        {% if not event.isFinished %}
+        <div class="d-flex justify-content-end mb-2">
+            {% for status in statusOptions %}
+                <a href="{{ current_url ~ '&status=' ~ status.value }}" 
+                class="btn me-2 {% if event.status == status %} btn-primary {% endif %}">
+                    {{ status.label|capitalize }}
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 
     
-    <h1>Événement : </h1>
-    {{ include('admin/eventStatusBadge.html.twig', { field: {'value': match.status}}) }} <br>
+
+   
+
+    <div class="card text-center mx-auto" >
+       <div class="position-relative text-center" style="height: 250px; overflow: hidden;">
+            <!-- Image de fond -->
+            <img src="{{ asset('images/blue_bg.jpg') }}" 
+                class="card-img-top w-100 h-100 object-fit-cover" 
+                alt="Bannière du match">
+
+            <!-- Contenu superposé -->
+            <div class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center text-white flex-nowrap">
+                
+                <!-- Bloc équipe domicile -->
+                <div class="d-flex flex-column align-items-center mx-3">
+                    <img src="{{ asset('uploads/clubs/' ~ homeTeam.club.imageName) }}" 
+                        alt="{{ homeTeam.club.name }}" 
+                        class="rounded-circle object-fit-cover mb-2" 
+                        style="width: 120px; height: 120px; object-fit: cover;">
+                    <p class="mb-0 fw-bold fs-6">{{ homeTeam.club.name }}</p>
+                </div>
+
+                <!-- Score -->
+                <p class="mx-4 display-1 fw-bold text-nowrap mb-0" style="font-size: 8rem;">
+                    {{ homeTeamScore }}&nbsp;-&nbsp;{{ awayTeamScore }}
+                </p>
+
+                <!-- Bloc équipe extérieur -->
+                <div class="d-flex flex-column align-items-center mx-3">
+                    <img src="{{ asset('uploads/clubs/' ~ awayTeam.club.imageName) }}" 
+                        alt="{{ awayTeam.club.name }}" 
+                        class="rounded-circle object-fit-cover mb-2" 
+                        style="width: 120px; height: 120px; object-fit: cover;">
+                    <p class="mb-0 fw-bold fs-6 text-nowrap">{{ awayTeam.club.name }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buteurs -->
+        <div class="card-body border-top">
+            {% if goals|length > 0 %}
+                <div class="row">
+                    <div class="col-6 text-start">
+                        <h5>Buts domicile</h5>
+                        {% set homeGoals = goals|filter(g => g.player and g.player.playsinteam.id == homeTeam.id) %}
+                        {% for goal in homeGoals %}
+                            <p class="mb-1">
+                                {{ goal.minuteGoal }}' {{ goal.player.user.firstname }} {{ goal.player.user.lastname }}
+                            </p>
+                        {% else %}
+                            <p class="mb-1">Aucun but</p>
+                        {% endfor %}
+                    </div>
+                    <div class="col-6 text-end">
+                        <h5>Buts extérieur</h5>
+                        {% set awayGoals = goals|filter(g => g.visitorPlayer and g.visitorPlayer.visitorTeam.id == awayTeam.id) %}
+                        {% for goal in awayGoals %}
+                            <p class="mb-1">
+                                {{ goal.minuteGoal }}' {{ goal.visitorPlayer }}
+                            </p>
+                        {% else %}
+                            <p class="mb-1">Aucun but</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <p class="mb-1">Aucun but marqué</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if event.isOngoing %}
+        <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-3">Ajouter un but</h3>
+                <p><em>Pour saisir un but adverse, ne pas selectionner de joueur.</em></p>
+
+                {{ form_start(goalForm, {'attr': {'class': 'row g-3'}}) }}
+
+                    <div class="col-md-4">
+                        {{ form_label(goalForm.minuteGoal) }}
+                        {{ form_widget(goalForm.minuteGoal, {'attr': {'class': 'form-control', 'placeholder': "Minute du but"}}) }}
+                        {{ form_errors(goalForm.minuteGoal) }}
+                    </div>
+
+                    <div class="col-md-8">
+                        {{ form_label(goalForm.selectedPlayer) }}
+                        {{ form_widget(goalForm.selectedPlayer, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_errors(goalForm.selectedPlayer) }}
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary mt-2 w-100">
+                            Ajouter un but
+                        </button>
+                    </div>
+
+                {{ form_end(goalForm) }}
+            </div>
+        </div>
+    {% endif %}
+
 
     <br>
+    <h3>Informations du match</h3>
+    <br>
+    <p><strong>Date :</strong> {{ event.date|date('d/m/Y H:i') }}</p>
+    <p><strong>Lieu :</strong> {{ event.stadium.name }}</p>
+    <p><strong>Adresse :</strong> {{ event.stadium.address.street }} {{ event.stadium.address.postalCode }} {{ event.stadium.address.town }}</p>
+    <p><strong>Statut :</strong> {{ event.status.label }}</p>
 
-    <p><strong>Date :</strong> {{ match.date|date('d/m/Y H:i') }}</p>
-    <p><strong>Lieu :</strong> {{ match.stadium.name }}</p>
-    <p><strong>Adresse :</strong> {{ match.stadium.address.street }} {{ match.stadium.address.postalCode }} {{ match.stadium.address.town }}</p>
-    {# <p><strong>Statut :</strong> {{ match.status.label }}</p> #}
+    <h3>Convocations et présences</h3>
+    <br>
 
+    {% if convocations|length == 0 %}
+        <a href="{{ createConvocationsUrl }}" class="btn btn-white mb-3">
+            <i class="fa fa-users"></i> Créer convocations
+        </a>
+    {% else %}
+        <h4>Joueuses</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Joueur</th>
+                        <th>Convocation</th>
+                        <th>Présence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for convocation in convocations %}
+                        <tr>
+                            <td>{{ convocation.player.user.firstname }} {{ convocation.player.user.lastname }}</td>
+                            <td>{{ convocation.status.label|capitalize }}</td>     
+                            <td>
+                                {% set presence = presences|filter(p => p.player.id == convocation.player.id)|first %}
 
-    
+                                {% for status in presenceOptions %}
+                                    <a href="{{ current_url ~ '&presence=' ~ presence.id ~ '&presenceStatus=' ~ status.value }}"
+                                    class="btn {% if presence.status.value == status.value %} btn-primary {% endif %}">
+                                        {{ status.label|capitalize }}
+                                    </a>
+                                {% endfor %}
 
-    
+                            </td>
+                            <td>
+                                <a href="{{ eventUrlService.generateDeleteConvocationUrl(event, convocation.id) }}"
+                                    class="btn btn-danger btn-sm">
+                                    Supprimer
+                                </a>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    {% endif %}
+    </div>
+
+    <div class="table-responsive">
+        <div class="card mt-3 shadow-sm col-md-9">
+            <div class="card-body">
+            <h5 class="card-title">Ajouter une convocation</h5>
+
+            {{ form_start(oneConvocationForm) }}
+                <div class="row g-2">
+                <div class="col-md-8 d-flex align-items-stretch">
+                    {{ form_widget(oneConvocationForm.player, {'attr': {'class': 'form-select h-100'}}) }}
+                </div>
+                <div class="col-md-4 d-flex align-items-stretch">
+                    <button type="submit" class="btn btn-success w-100 h-100">➕ Ajouter</button>
+                </div>
+                </div>
+            {{ form_end(oneConvocationForm) }}
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
