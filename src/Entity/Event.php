@@ -267,15 +267,30 @@ class Event
 
         return $this;
     }
+    // public function getHomeScore(): int
+    // {
+    //     return $this->goals
+    //         ->filter(fn(Goal $goal) =>
+    //             $goal->getPlayer() !== null &&
+    //             $goal->getPlayer()->getPlaysInTeam() === $this->team
+    //         )
+    //         ->count();
+    // }
+
     public function getHomeScore(): int
     {
+        $homeConvocations = $this->getConvocations()
+            ->map(fn($c) => $c->getPlayer())
+            ->toArray();
+
         return $this->goals
             ->filter(fn(Goal $goal) =>
-                $goal->getPlayer() !== null &&
-                $goal->getPlayer()->getPlaysInTeam() === $this->team
+                $goal->getPlayer() !== null && in_array($goal->getPlayer(), $homeConvocations, true)
             )
             ->count();
     }
+
+
 
     // Calcul du score pour la team visiteuse
     public function getVisitorScore(): int

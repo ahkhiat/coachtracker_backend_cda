@@ -20,9 +20,6 @@
         {% endif %}
     </div>
 
-    
-
-   
 
     <div class="card text-center mx-auto" >
        <div class="position-relative text-center" style="height: 250px; overflow: hidden;">
@@ -65,7 +62,11 @@
                 <div class="row">
                     <div class="col-6 text-start">
                         <h5>Buts domicile</h5>
-                        {% set homeGoals = goals|filter(g => g.player and g.player.playsinteam.id == homeTeam.id) %}
+                        {% set homeGoals = goals
+                            |filter(g => g.player and g.player in event.getConvocations()|map(c => c.getPlayer()))
+
+                            | sort ((a,b) => a.minuteGoal <=> b.minuteGoal)
+                             %}
                         {% for goal in homeGoals %}
                             <p class="mb-1">
                                 {{ goal.minuteGoal }}' {{ goal.player.user.firstname }} {{ goal.player.user.lastname }}
@@ -76,7 +77,10 @@
                     </div>
                     <div class="col-6 text-end">
                         <h5>Buts extérieur</h5>
-                        {% set awayGoals = goals|filter(g => g.visitorPlayer and g.visitorPlayer.visitorTeam.id == awayTeam.id) %}
+                        {% set awayGoals = goals
+                            |filter(g => g.visitorPlayer and g.visitorPlayer.visitorTeam.id == awayTeam.id) 
+                            | sort ((a,b) => a.minuteGoal <=> b.minuteGoal)
+                            %}
                         {% for goal in awayGoals %}
                             <p class="mb-1">
                                 {{ goal.minuteGoal }}' {{ goal.visitorPlayer }}
@@ -141,6 +145,7 @@
         </a>
     {% else %}
         <h4>Joueuses</h4>
+        <p class="">{{convocations.count}} joueuses convoquées</p>
         <div class="table-responsive">
             <table class="table">
                 <thead>

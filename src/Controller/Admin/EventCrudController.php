@@ -6,6 +6,7 @@ use DatePeriod;
 use DateInterval;
 use App\Entity\Goal;
 use App\Entity\Event;
+use App\Entity\Player;
 use App\Form\GoalType;
 use App\Entity\Stadium;
 use App\Entity\Presence;
@@ -355,8 +356,13 @@ class EventCrudController extends AbstractCrudController
     private function handleGoalForm(Request $request, Event $event): ?FormInterface
     {
         $goal = new Goal();
+
+        $convocations = $event->getConvocations();
+        $players = array_map(fn($c) => $c->getPlayer(), $convocations->toArray());
+
         $form = $this->createForm(GoalType::class, $goal, [
-            'players' => $event->getTeam()->getPlayers(),
+            // 'players' => $event->getTeam()->getPlayers(),
+            'players' => $players
         ]);
 
         $form->handleRequest($request);
@@ -393,6 +399,42 @@ class EventCrudController extends AbstractCrudController
             $goal->setEvent($event);
             $this->goalService->createGoal($event->getId(), $playerId, $minuteGoal, $isVisitor);
         }
+
+        // if ($form->isSubmitted() && $form->isValid()) {
+        //     $minuteGoal = $goal->getMinuteGoal();
+        //     /** @var Player|null $selectedPlayer */
+        //     $selectedPlayer = $form->get('selectedPlayer')->getData();
+
+        //     if ($selectedPlayer) {
+        //         // On a une vraie joueuse convoquée
+        //         $goal->setPlayer($selectedPlayer);
+        //         $isVisitor = $selectedPlayer->getPlaysInTeam()->getId() === $event->getVisitorTeam()->getId();
+        //         $playerId = $selectedPlayer->getId();
+        //     } else {
+        //         // Aucun joueur sélectionné → ghost player
+        //         $visitorTeam = $event->getVisitorTeam();
+        //         $ghostPlayer = $this->playerRepository->findOneBy([
+        //             'playsInTeam' => $visitorTeam,
+        //             'user' => null,
+        //         ]);
+
+        //         if (!$ghostPlayer) {
+        //             $ghostPlayer = new VisitorPlayer();
+        //             $ghostPlayer->generateUuid();
+        //             $ghostPlayer->setVisitorTeam($visitorTeam);
+        //             $this->em->persist($ghostPlayer);
+        //             $this->em->flush();
+        //         }
+
+        //         $goal->setVisitorPlayer($ghostPlayer);
+        //         $playerId = $ghostPlayer->getId();
+        //         $isVisitor = true;
+        //     }
+
+        //     $goal->setEvent($event);
+        //     $this->goalService->createGoal($event->getId(), $playerId, $minuteGoal, $isVisitor);
+        // }
+
 
         return $form;
     }
